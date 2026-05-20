@@ -29,3 +29,15 @@ MAJOR.MINOR.PATCH
 
 ### Não implementado nesta fase
 - Módulo de metas financeiras.
+
+## [0.2.0] - Configuração da base de dados e libs
+
+### Detalhe
+- Configuração e instalação de bibliotecas
+- Definição de constantes no arquivo .env.example
+- Função inicial de conexão com base de dados
+
+## [0.3.0] - Implementação da página cadastro
+
+### Detalhe
+- Codificação da página cadastro.html na pasta templates

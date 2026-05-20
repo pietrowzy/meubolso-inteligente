@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Cadastro</h1>
+
+    <form id="cadastroForm" method="POST" action="/cadastro">
+
+        {% if erro %}
+            <p style="color:red; text-align:center;">
+                {{ erro }}
+            </p>
+        {% endif %}
+
+        <input type="text" name="nome" id="nome" placeholder="Nome completo" required>
+
+        <input type="email" name="email" id="email" placeholder="E-mail" required>
+
+        <input type="password" name="senha" id="senha" placeholder="Senha" required>
+
+        <input type="number" name="idade" id="idade" placeholder="Idade">
+
+        <select name="perfil" id="perfil">
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+            <option value="funcionario">Funcionário</option>
+            <option value="responsavel">Responsável</option>
+        </select>
+
+        <button type="submit">Cadastrar</button>
+
+    </form>
+
+    <div class="link">
+        <a href="/login">Já tenho conta</a>
+    </div>
+
+</div>
+
+</body>
+</html>
