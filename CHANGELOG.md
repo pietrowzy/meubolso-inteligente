@@ -41,3 +41,8 @@ MAJOR.MINOR.PATCH
 
 ### Detalhe
 - Codificação da página cadastro.html na pasta templates
+
+## [0.4.0] - Implementação da página index
+
+### Detalhe
+- Codificação da página index.html na pasta templates
