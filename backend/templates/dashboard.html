@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container dashboard">
+    <div class="menu">
+    <h2>Dashboard</h2>
+
+    <div>
+        <a href="/receitas">Receitas</a>
+        <a href="/despesas">Despesas</a>
+        <a href="/relatorios">Relatórios</a>
+        <a href="/ia">IA</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/logout">Sair</a>
+    </div>
+</div>
+
+<div class="cards">
+
+        <div class="card receitas">
+            <h3>Receitas</h3>
+            <p id="totalReceitas">R$ 0,00</p>
+        </div>
+
+        <div class="card despesas">
+            <h3>Despesas</h3>
+            <p id="totalDespesas">R$ 0,00</p>
+        </div>
+
+        <div class="card saldo">
+            <h3>Saldo</h3>
+            <p id="saldo">R$ 0,00</p>
+        </div>
+        
+        <div class="graficos-container">
+
+            <div class="graficos-grid-2">
+
+                <!-- RESUMO-->
+                <div class="grafico-card despesas-categoria">
+                    <h3>Resumo Financeiro</h3>
+
+                    <div class="grafico-box">
+                        <canvas id="graficoResumo"></canvas>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="graficos-grid-2">
+
+                <!-- DESPESAS POR CATEGORIA -->
+                <div class="grafico-card despesas-categoria">
+                    <h3>Despesas por Categoria</h3>
+        
+                    <div class="grafico-box">
+                        <canvas id="graficoCategoria"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+</div>
+        
+
+
+<script src=""></script>
+<script>
+    window.USUARIO_ID = {{ usuario_id }};
+</script>
+<script src=""></script>
+
+</body>
+</html>
