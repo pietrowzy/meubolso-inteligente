@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatórios</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container dashboard">
+
+    <div class="menu">
+        <h2>Relatórios</h2>
+        <a href="/dashboard">Voltar</a>
+    </div>
+
+    <h3>Despesas por Categoria</h3>
+
+    <div id="relatorioCategorias" class="lista"></div>
+
+    <hr style="margin: 25px 0;">
+
+    <h3>Histórico de Receitas</h3>
+
+    <div id="listaReceitas" class="lista"></div>
+
+    <hr style="margin: 25px 0;">
+
+    <h3>Histórico de Despesas</h3>
+
+    <div id="listaDespesas" class="lista"></div>
+
+</div>
+
+<script>
+    window.USUARIO_ID = {{ usuario_id }};
+</script>
+<script src=""></script>
+
+</body>
+</html>
