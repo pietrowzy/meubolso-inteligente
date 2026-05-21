@@ -82,3 +82,8 @@ MAJOR.MINOR.PATCH
 
 ### Detalhe
 - Codificação da página feedback.html na pasta templates
+
+## [0.12.0] - Implementação dos estilos das páginas
+
+### Detalhe
+- Codificação do arquivo style na pasta css
