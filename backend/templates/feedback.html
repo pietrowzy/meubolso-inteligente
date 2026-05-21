@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback - MeuBolso Inteligente</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container dashboard">
+
+    <div class="menu">
+        <h2>Feedback</h2>
+        <a href="/dashboard">Voltar</a>
+    </div>
+
+    <p class="texto-ajuda">
+        Sua opinião ajuda a melhorar o MeuBolso Inteligente.
+    </p>
+
+    <form id="feedbackForm" method="POST" action="/feedback">
+
+        {% if erro %}
+            <p style="color:red; text-align:center;">
+                {{ erro }}
+            </p>
+        {% endif %}
+
+        <label>Como você avalia o sistema?</label>
+
+        <select name="nota" id="notaFeedback" required>
+            <option value="">Selecione uma nota</option>
+            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+            <option value="4">⭐⭐⭐⭐ Bom</option>
+            <option value="3">⭐⭐⭐ Regular</option>
+            <option value="2">⭐⭐ Ruim</option>
+            <option value="1">⭐ Muito ruim</option>
+        </select>
+
+        <label>Comentário</label>
+
+        <textarea 
+            name="comentario"
+            id="comentarioFeedback" 
+            placeholder="Conte o que você achou do sistema..."
+            rows="5"
+        ></textarea>
+
+        <button type="submit">Enviar Feedback</button>
+
+    </form>
+
+    <hr style="margin: 25px 0;">
+
+    <h3>Feedbacks enviados</h3>
+
+    <div id="listaFeedbacks" class="lista"></div>
+
+</div>
+
+<script src=""></script>
+
+</body>
+</html>
