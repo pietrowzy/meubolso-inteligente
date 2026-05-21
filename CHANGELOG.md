@@ -68,7 +68,17 @@ MAJOR.MINOR.PATCH
 ### Detalhe
 - Codificação da página despesas.html na pasta templates
 
-## [0.9.0] - Implementação da página receitas
+## [0.9.0] - Implementação da página de receitas
 
 ### Detalhe
-- Codificação da página receitas.html na pasta templates
+- Codificação da página receitas na pasta templates
+
+## [0.10.0] - Implementação da página ia
+
+### Detalhe
+- Codificação da página ia.html na pasta templates
+
+## [0.11.0] - Implementação da página feedback
+
+### Detalhe
+- Codificação da página feedback.html na pasta templates
