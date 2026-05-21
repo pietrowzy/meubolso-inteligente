@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Despesas</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="menu">
+        <h2>Nova Despesa</h2>
+        <a href="/dashboard">Voltar</a>
+    </div>
+
+    <form id="despesaForm" method="POST" action="/despesas">
+
+        {% if erro %}
+            <p style="color:red; text-align:center;">
+                {{ erro }}
+            </p>
+        {% endif %}
+
+        <input 
+            type="text" 
+            name="descricao" 
+            id="descricaoDespesa" 
+            placeholder="Descrição da despesa" 
+            required
+        >
+
+        <input 
+            type="number" 
+            step="0.01" 
+            name="valor" 
+            id="valorDespesa" 
+            placeholder="Valor" 
+            required
+        >
+
+        <input 
+            type="date" 
+            name="data_despesa" 
+            id="dataDespesa" 
+            required
+        >
+
+        <select name="categoria_id" id="categoriaDespesa">
+            <option value="">Selecione uma categoria</option>
+
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">
+                    {{ categoria.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Salvar Despesa</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
