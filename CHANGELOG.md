@@ -56,3 +56,9 @@ MAJOR.MINOR.PATCH
 
 ### Detalhe
 - Codificação da página dashboard.html na pasta templates
+
+## [0.7.0] - Implementação da página relatorios
+
+### Detalhe
+- Codificação da página relatorios.html na pasta templates
+
