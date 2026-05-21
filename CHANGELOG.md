@@ -51,3 +51,8 @@ MAJOR.MINOR.PATCH
 
 ### Detalhe
 - Codificação da página login.html na pasta templates
+
+## [0.6.0] - Implementação da página dashboard
+
+### Detalhe
+- Codificação da página dashboard.html na pasta templates
