@@ -86,4 +86,7 @@ MAJOR.MINOR.PATCH
 ## [0.12.0] - Implementação dos estilos das páginas
 
 ### Detalhe
-- Codificação do arquivo style na pasta css
+- Codificação do arquivo style na pasta estática css
+
+### [0.13.0] - Implementação do JavaScript
+- Codificação do arquivo app.js na pasta estática js
