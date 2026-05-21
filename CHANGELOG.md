@@ -46,3 +46,8 @@ MAJOR.MINOR.PATCH
 
 ### Detalhe
 - Codificação da página index.html na pasta templates
+
+## [0.5.0] - Implementação da página login
+
+### Detalhe
+- Codificação da página login.html na pasta templates

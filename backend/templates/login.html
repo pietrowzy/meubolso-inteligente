@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - MeuBolso Inteligente</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>MeuBolso Inteligente</h1>
+    <h2>Login</h2>
+
+    <form id="loginForm" method="POST" action="/login">
+        
+        {% if erro %}
+            <p style="color:red; text-align:center;">
+                {{ erro }}
+            </p>
+        {% endif %}
+
+        <input type="email" id="email" name="email" placeholder="E-mail" required>
+
+        <input type="password" id="senha" name="senha" placeholder="Senha" required>
+
+        <button type="submit">Entrar</button>
+
+    </form>
+
+    <div class="link">
+        <a href="/cadastro">Criar conta</a>
+    </div>
+
+</div>
+
+</body>
+</html>
