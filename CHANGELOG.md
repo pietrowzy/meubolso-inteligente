@@ -62,3 +62,8 @@ MAJOR.MINOR.PATCH
 ### Detalhe
 - Codificação da página relatorios.html na pasta templates
 
+## [0.8.0] - Implementação da página despesas
+
+### Detalhe
+- Codificação da página despesas.html na pasta templates
+
