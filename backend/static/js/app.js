@@ -282,3 +282,115 @@ async function carregarRelatorioCategorias() {
     }); 
 }
 
+// ============================ 
+// FUNÇÕES: HISTÓRICO DE RECEITAS E DESPESAS 
+// ============================ 
+// Essas funções carregam listas de receitas e despesas e populam o HTML 
+async function carregarHistoricoReceitas() { 
+    const container = document.getElementById("listaReceitas"); 
+    if (!container) return; 
+ 
+    const response = await fetch(`${API_URL}/receitas/listar`); 
+    const receitas = await response.json(); 
+ 
+    container.innerHTML = ""; 
+ 
+    if (receitas.length === 0) { 
+        container.innerHTML = "<p>Nenhuma receita cadastrada ainda.</p>"; 
+        return; 
+    } 
+ 
+    receitas.forEach(item => { 
+        const div = document.createElement("div"); 
+        div.className = "item-lista"; 
+ 
+        div.innerHTML = ` 
+            <div> 
+                <strong>${item.descricao}</strong> 
+                <p>${item.categoria || "Sem categoria"} - ${item.data_receita}</p> 
+            </div> 
+            <span class="valor-receita">R$ ${item.valor.toFixed(2)}</span> 
+        `; 
+        container.appendChild(div); 
+    }); 
+} 
+ 
+async function carregarHistoricoDespesas() { 
+    const container = document.getElementById("listaDespesas"); 
+    if (!container) return; 
+ 
+    const response = await fetch(`${API_URL}/despesas/listar`); 
+    const despesas = await response.json(); 
+ 
+    container.innerHTML = ""; 
+ 
+    if (despesas.length === 0) { 
+        container.innerHTML = "<p>Nenhuma despesa cadastrada ainda.</p>"; 
+        return; 
+    } 
+ 
+    despesas.forEach(item => { 
+        const div = document.createElement("div"); 
+        div.className = "item-lista"; 
+ 
+        div.innerHTML = ` 
+            <div> 
+                <strong>${item.descricao}</strong> 
+                <p>${item.categoria || "Sem categoria"} - ${item.data_despesa}</p> 
+            </div> 
+            <span class="valor-despesa">R$ ${item.valor.toFixed(2)}</span> 
+        `; 
+        container.appendChild(div); 
+    }); 
+} 
+ 
+// Executa relatórios apenas na página de relatórios 
+if (document.getElementById("relatorioCategorias")) { 
+    carregarRelatorios(); 
+} 
+ 
+// ============================ 
+// FUNÇÃO: CARREGAR FEEDBACKS 
+// ============================ 
+async function carregarFeedbacks() { 
+    const container = document.getElementById("listaFeedbacks"); 
+    if (!container) return; 
+ 
+    const response = await fetch("/feedbacks"); 
+    const feedbacks = await response.json(); 
+ 
+    container.innerHTML = ""; 
+ 
+    if (!response.ok || !feedbacks.length) { 
+        container.innerHTML = ` 
+            <div class="feedback-vazio"> 
+                Nenhum feedback enviado ainda. 
+            </div> 
+        `; 
+        return; 
+    } 
+ 
+    feedbacks.forEach(item => { 
+        let estrelas = ""; 
+        for (let i = 0; i < Number(item.nota); i++) estrelas += "   "; 
+ 
+        const div = document.createElement("div"); 
+        div.className = "feedback-card"; 
+ 
+        div.innerHTML = ` 
+            <div class="feedback-topo"> 
+                <div class="feedback-nota">${estrelas}</div> 
+                <div class="feedback-data">${item.criado_em}</div> 
+            </div> 
+            <div class="feedback-comentario"> 
+                ${item.comentario || "Sem comentário."} 
+            </div> 
+        `; 
+ 
+        container.appendChild(div); 
+    }); 
+} 
+ 
+if (document.getElementById("listaFeedbacks")) { 
+    carregarFeedbacks(); 
+} 
