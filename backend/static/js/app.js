@@ -187,4 +187,98 @@ async function carregarGraficoCategoria() {
     }); 
 }
 
+// ============================ 
+// FUNÇÃO: CARREGAR GRÁFICO RESUMO FINANCEIRO 
+// ============================ 
+async function carregarGraficoResumo() { 
+    const canvas = document.getElementById("graficoResumo"); 
+    if (!canvas) return; 
+ 
+    const response = await fetch("/dashboard/dados"); 
+    const dados = await response.json(); 
+    if (!response.ok) return; 
+ 
+    const receitas = Number(dados.total_receitas); 
+    const despesas = Number(dados.total_despesas); 
+ 
+    const valores = [receitas, despesas]; 
+    const total = valores.reduce((acc, item) => acc + item, 0); 
+ 
+    new Chart(canvas, { 
+        type: "doughnut", 
+        data: { 
+            labels: ["Receitas", "Despesas"], 
+            datasets: [{ 
+                data: valores, 
+                backgroundColor: ["#43a047", "#e53935"], 
+                borderWidth: 2, 
+                borderColor: "#ffffff", 
+                hoverOffset: 12 
+            }] 
+        }, 
+        plugins: [pluginValoresGraficos], 
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            cutout: "55%", 
+            plugins: { 
+                legend: { 
+                    position: "bottom", 
+                    labels: { padding: 18, font: { size: 13 } } 
+                }, 
+                tooltip: { 
+                    callbacks: { 
+                        label: function(context) { 
+                            const valor = Number(context.raw); 
+                            const porcentagem = total > 0 
+                                ? ((valor / total) * 100).toFixed(1) 
+                                : "0.0"; 
+                            return ` ${context.label}: R$ ${valor.toFixed(2)} (${porcentagem}%)`; 
+                        } 
+                    } 
+                } 
+            }, 
+            animation: { animateRotate: true, animateScale: true } 
+        } 
+    }); 
+} 
+ 
+// ============================ 
+// FUNÇÃO: CARREGAR RELATÓRIO DE DESPESAS POR CATEGORIA 
+// ============================ 
+async function carregarRelatorioCategorias() { 
+    const container = document.getElementById("relatorioCategorias"); 
+    if (!container) return; 
+ 
+    const response = await fetch("/relatorios/despesas-categorias"); 
+    const dados = await response.json(); 
+ 
+    container.innerHTML = ""; 
+ 
+    if (dados.length === 0) { 
+        container.innerHTML = "<p>Nenhuma despesa cadastrada ainda.</p>"; 
+        return; 
+    } 
+ 
+    const maiorValor = Math.max(...dados.map(item => item.total)); 
+ 
+    dados.forEach(item => { 
+        const porcentagem = (item.total / maiorValor) * 100; 
+ 
+        const div = document.createElement("div"); 
+        div.className = "item-lista"; 
+ 
+        div.innerHTML = ` 
+            <div style="width:100%"> 
+                <strong>${item.categoria || "Sem categoria"}</strong> 
+                <p>R$ ${item.total.toFixed(2)}</p> 
+                <div class="barra"> 
+                    <div class="barra-preenchida" style="width:${porcentagem}%"></div> 
+                </div> 
+            </div> 
+        `; 
+ 
+        container.appendChild(div); 
+    }); 
+}
 
