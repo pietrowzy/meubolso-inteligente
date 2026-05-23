@@ -2,7 +2,9 @@
 // Configuração da API 
 // ============================ 
 // Define a URL base da nossa API para requisições 
-const API_URL = "http://127.0.0.1:5000"; 
+const API_URL = "http://127.0.0.1:5000";
+
+
 // ============================ 
 // FUNÇÃO: PROTEGER PÁGINAS INTERNAS 
 // ============================ 
@@ -16,6 +18,8 @@ id: window.USUARIO_ID
 } 
 return null; 
 } 
+
+
 // ============================ 
 // FUNÇÃO: CARREGAR CATEGORIAS 
 // ============================ 
@@ -35,7 +39,8 @@ const response = await fetch(`${API_URL}/categorias?tipo=${tipo}`);
         option.textContent = categoria.nome; 
         select.appendChild(option); 
     }); 
-} 
+}
+
  
 // ============================ 
 // FUNÇÃO: CARREGAR RELATÓRIOS 
@@ -55,6 +60,7 @@ async function carregarRelatorios() {
     await carregarHistoricoReceitas(); 
     await carregarHistoricoDespesas(); 
 } 
+
  
 // ============================ 
 // FUNÇÃO: CARREGAR DASHBOARD 
@@ -78,7 +84,8 @@ async function carregarDashboard() {
  
     document.getElementById("saldo").innerText = 
         `R$ ${Number(data.saldo).toFixed(2)}`; 
-} 
+}
+
  
 // ============================ 
 // INICIALIZA DASHBOARD AUTOMATICAMENTE 
@@ -88,6 +95,7 @@ if (document.getElementById("saldo")) {
     carregarGraficoResumo(); 
     carregarGraficoCategoria(); 
 }
+
 
 // ============================ 
 // PLUGIN PARA GRAFICOS (Chart.js) 
@@ -120,6 +128,7 @@ const pluginValoresGraficos = {
                     position = element.tooltipPosition(); 
                     position.y -= 12; 
                 } 
+
  
                 ctx.fillText(texto, position.x, position.y); 
             }); 
@@ -128,6 +137,7 @@ const pluginValoresGraficos = {
         ctx.restore(); 
     } 
 }; 
+
  
 // ============================ 
 // FUNÇÃO: CARREGAR GRÁFICO DE CATEGORIAS DE DESPESAS 
@@ -187,6 +197,7 @@ async function carregarGraficoCategoria() {
     }); 
 }
 
+
 // ============================ 
 // FUNÇÃO: CARREGAR GRÁFICO RESUMO FINANCEIRO 
 // ============================ 
@@ -242,6 +253,7 @@ async function carregarGraficoResumo() {
         } 
     }); 
 } 
+
  
 // ============================ 
 // FUNÇÃO: CARREGAR RELATÓRIO DE DESPESAS POR CATEGORIA 
@@ -282,6 +294,7 @@ async function carregarRelatorioCategorias() {
     }); 
 }
 
+
 // ============================ 
 // FUNÇÕES: HISTÓRICO DE RECEITAS E DESPESAS 
 // ============================ 
@@ -314,6 +327,7 @@ async function carregarHistoricoReceitas() {
         container.appendChild(div); 
     }); 
 } 
+
  
 async function carregarHistoricoDespesas() { 
     const container = document.getElementById("listaDespesas"); 
@@ -343,11 +357,13 @@ async function carregarHistoricoDespesas() {
         container.appendChild(div); 
     }); 
 } 
+
  
 // Executa relatórios apenas na página de relatórios 
 if (document.getElementById("relatorioCategorias")) { 
     carregarRelatorios(); 
 } 
+
  
 // ============================ 
 // FUNÇÃO: CARREGAR FEEDBACKS 
@@ -394,3 +410,93 @@ async function carregarFeedbacks() {
 if (document.getElementById("listaFeedbacks")) { 
     carregarFeedbacks(); 
 } 
+
+
+// ============================
+// FUNÇÔES DA PÁGINA IA
+// ============================
+carregarSugestoesIA();
+
+const btnGerarAnalise = document.getElementById("btnGerarAnalise");
+if (btnGerarAnalise) {
+    btnGerarAnalise.addEventListener("click", gerarAnaliseFinanceira);
+}
+
+async function gerarAnaliseFinanceira() {
+    const resultado = document.getElementById("resultadoIA");
+    const botao = document.getElementById("btnGerarAnalise");
+
+    resultado.style.display = "block";
+    resultado.innerHTML = "<p>Gerando análise financeira...</p>";
+
+    botao.disabled = true;
+    botao.innerText = "Aguarde...";
+
+    try {
+        const response = await fetch("/ia/analise-financeira");
+        const data = await response.json();
+
+        if (response.ok) {
+            resultado.innerHTML = `
+                <strong>Nova análise da IA:</strong>
+                <p>${data.analise.replace(/\n/g, "<br>")}</p>
+            `;
+
+            carregarSugestoesIA();
+        } else {
+            resultado.innerHTML = `<p>${data.erro}</p>`;
+        }
+
+    } catch (error) {
+        resultado.innerHTML = "<p>Erro ao gerar análise. Tente novamente.</p>";
+    }
+
+    botao.disabled = false;
+    botao.innerText = "Gerar análise com IA";
+}
+
+async function carregarSugestoesIA() {
+    const container = document.getElementById("listaSugestoesIA");
+
+    if (!container) return;
+
+    container.innerHTML = "<p>Carregando análises...</p>";
+
+    try {
+        const response = await fetch("/ia/sugestoes");
+        const sugestoes = await response.json();
+
+        container.innerHTML = "";
+
+        if (!response.ok) {
+            container.innerHTML = `<p>${sugestoes.erro}</p>`;
+            return;
+        }
+
+        if (sugestoes.length === 0) {
+            container.innerHTML = "<p>Nenhuma análise gerada ainda.</p>";
+            return;
+        }
+
+        sugestoes.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "feedback-card";
+
+            div.innerHTML = `
+                <div class="feedback-topo">
+                    <strong>Análise financeira</strong>
+                    <span class="feedback-data">${item.criado_em}</span>
+                </div>
+
+                <div class="feedback-comentario">
+                    ${item.resposta.replace(/\n/g, "<br>")}
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        container.innerHTML = "<p>Erro ao carregar análises anteriores.</p>";
+    }
+}
