@@ -93,3 +93,6 @@ MAJOR.MINOR.PATCH
 - Atualização do CHANGELOG.md
 
 
+### [0.17.0] - Implementação do app.py
+## Detalhe
+- Atualização do arquivo app.py na pasta backend
