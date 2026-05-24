@@ -11,4 +11,4 @@ DB_CONFIG = {
     "port": int(os.getenv("DB_PORT", 3306))
 }
 
-GROQ_API_KEY = os.getenv("GROQ_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")

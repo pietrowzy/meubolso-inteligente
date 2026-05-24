@@ -92,7 +92,10 @@ MAJOR.MINOR.PATCH
 ## Detalhe
 - Atualização do CHANGELOG.md
 
-
 ### [0.17.0] - Implementação do app.py
 ## Detalhe
 - Atualização do arquivo app.py na pasta backend
+
+### [0.18.0] - Atualização de rotas no app.py
+## Detalhe
+- Acrescenta novas rotas e atualiza rotas existentes no arquivo app.py na pasta backend

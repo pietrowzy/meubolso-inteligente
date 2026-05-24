@@ -2,25 +2,16 @@
 # IMPORTAÇÃO DAS BIBLIOTECAS
 # ==========================================================
 
-# Flask:
-# Framework web utilizado para criar aplicações web em Python.
-# Ele permite criar rotas, páginas, APIs e controlar requisições HTTP.
+# Este bloco reúne todas as bibliotecas e recursos externos usados no sistema.
+#
+# Aqui são importados o Flask, recursos de requisição, sessão, templates,
+# respostas em JSON, segurança de senhas, conexão com o banco de dados
+# e o cliente de inteligência artificial usado no projeto.
+import os
 from flask import Flask, request, redirect, session, render_template, jsonify, url_for
-
-# Flask-CORS:
-# Permite que o sistema aceite requisições de outros domínios.
-# Muito usado quando frontend e backend estão separados.
 from flask_cors import CORS
-
-# Werkzeug Security:
-# Biblioteca usada para criptografar senhas e verificar hashes.
-# Isso aumenta a segurança do sistema.
 from werkzeug.security import generate_password_hash, check_password_hash
-
-# Importa a função responsável por conectar ao banco de dados.
 from db import get_connection
-
-# Importa o cliente de IA da Groq.
 from ia import client_groq
 
 
@@ -28,76 +19,17 @@ from ia import client_groq
 # INICIALIZAÇÃO DA APLICAÇÃO
 # ==========================================================
 
-# Cria a aplicação Flask.
+# Este bloco cria e configura a aplicação Flask.
+#
+# A aplicação é inicializada, o CORS é habilitado e a chave secreta
+# é definida para proteger as sessões dos usuários logados.
+#
+# A chave deve ser gerada pelo desenvolvedor e armazenada em uma variável
+# de ambiente segura, evitando exposição no controle de versão.
 app = Flask(__name__)
-
-# Habilita o CORS no sistema.
 CORS(app)
 
-# SECRET KEY:
-# Chave usada pelo Flask para proteger sessões.
-#
-# Sessões armazenam informações do usuário logado.
-#
-# Exemplo:
-# session["id"] = 1
-#
-# IMPORTANTE:
-# Nunca deixar vazio em produção.
-app.secret_key = ""
-
-
-# ==========================================================
-# ARQUITETURA GERAL DO SISTEMA
-# ==========================================================
-
-# Este sistema segue uma arquitetura parecida com MVC:
-#
-# MODEL:
-# Banco de dados MySQL
-#
-# VIEW:
-# Templates HTML
-#
-# CONTROLLER:
-# Rotas Flask
-#
-#
-# Estrutura provável:
-#
-# projeto/
-# │
-# ├── app.py
-# ├── db.py
-# ├── ia.py
-# │
-# ├── templates/
-# │   ├── login.html
-# │   ├── dashboard.html
-# │   └── ...
-# │
-# ├── static/
-# │   ├── css/
-# │   ├── js/
-# │   └── img/
-# │
-# └── banco.sql
-#
-#
-# RESPONSABILIDADES:
-#
-# app.py
-# -> controla rotas e regras do sistema
-#
-# db.py
-# -> conecta no banco
-#
-# ia.py
-# -> comunicação com inteligência artificial
-#
-# templates/
-# -> interface do usuário
-#
+app.secret_key = os.getenv("SECRET_KEY", "")
 
 
 # ==========================================================
@@ -106,28 +38,27 @@ app.secret_key = ""
 
 def formatar_data_br(data):
 
-    # Verifica se a data existe.
+    # Esta função recebe uma data do banco de dados e converte para
+    # o padrão brasileiro, facilitando a leitura pelo usuário.
+    #
+    # Exemplo:
+    # 2026-05-24 será exibido como 24/05/2026.
     if not data:
         return None
 
-    # Converte a data para padrão brasileiro.
-    #
-    # %d -> dia
-    # %m -> mês
-    # %Y -> ano
     return data.strftime("%d/%m/%Y")
 
 
 def formatar_datahora_br(datahora):
 
-    # Verifica se a data/hora existe.
+    # Esta função recebe uma data com horário e converte para o padrão
+    # brasileiro, exibindo dia, mês, ano, hora e minuto.
+    #
+    # Exemplo:
+    # 2026-05-24 14:30 será exibido como 24/05/2026 14:30.
     if not datahora:
         return None
 
-    # Formata data e hora no padrão brasileiro.
-    #
-    # %H -> hora
-    # %M -> minuto
     return datahora.strftime("%d/%m/%Y %H:%M")
 
 
@@ -135,25 +66,16 @@ def formatar_datahora_br(datahora):
 # ROTA PRINCIPAL
 # ==========================================================
 
-# @app.route define uma rota.
-#
-# "/" significa página inicial.
-#
-# methods=["GET"]
-# indica que essa rota aceita apenas requisições GET.
 @app.route("/", methods=["GET"])
 def home():
 
-    # Verifica se o usuário está logado.
+    # Esta rota representa a página inicial do sistema.
     #
-    # session funciona como um armazenamento temporário
-    # do usuário autenticado.
+    # Se o usuário já estiver logado, ele será redirecionado diretamente
+    # para o dashboard. Caso contrário, será exibida a página inicial.
     if 'id' in session:
-
-        # Redireciona para dashboard.
         return redirect(url_for('dashboard'))
 
-    # Renderiza a página index.html
     return render_template('index.html')
 
 
@@ -164,86 +86,70 @@ def home():
 @app.route("/login", methods=["GET"])
 def get_login():
 
-    # Se já estiver logado, vai direto para dashboard.
+    # Esta rota exibe a tela de login.
+    #
+    # Caso o usuário já esteja autenticado, não há necessidade de fazer
+    # login novamente, então ele é redirecionado para o dashboard.
     if 'id' in session:
         return redirect(url_for('dashboard'))
 
-    # Exibe tela de login.
     return render_template("login.html")
 
 
 @app.route("/login", methods=["POST"])
 def login():
 
-    # request.form pega dados enviados pelo formulário HTML.
+    # Esta rota processa o formulário de login.
+    #
+    # Ela recebe email e senha, consulta o usuário no banco de dados,
+    # verifica se a senha está correta e, em caso positivo, cria a sessão
+    # do usuário autenticado no sistema.
     email = request.form.get("email")
     senha = request.form.get("senha")
 
-    # Validação básica.
     if not email or not senha:
         return render_template(
             "login.html",
             erro="Email e senha são obrigatórios."
         )
 
-    # Abre conexão com banco.
     conn = get_connection()
-
-    # dictionary=True:
-    # Faz o resultado vir como dicionário.
-    #
-    # Exemplo:
-    # usuario["email"]
     cursor = conn.cursor(dictionary=True)
 
     try:
-
-        # SQL parametrizado:
-        # Evita SQL Injection.
         cursor.execute(
             "SELECT * FROM usuarios WHERE email = %s",
             (email,)
         )
 
-        # Pega apenas um usuário.
         usuario = cursor.fetchone()
 
-        # Verifica se usuário existe.
         if not usuario:
             return render_template(
                 "login.html",
                 erro="Usuário não encontrado."
             )
 
-        # Verifica senha criptografada.
-        #
-        # check_password_hash(hash_do_banco, senha_digitada)
         if not check_password_hash(usuario["senha"], senha):
             return render_template(
                 "login.html",
                 erro="Senha incorreta."
             )
 
-        # Cria sessão do usuário.
         session["id"] = usuario["id"]
         session["nome"] = usuario["nome"]
         session["email"] = usuario["email"]
         session["perfil"] = usuario["perfil"]
 
-        # Redireciona para dashboard.
         return redirect(url_for("dashboard"))
 
     except Exception as e:
-
-        # Captura erros.
         return render_template(
             "login.html",
             erro=str(e)
         )
 
     finally:
-
-        # Fecha conexão mesmo em caso de erro.
         cursor.close()
         conn.close()
 
@@ -255,13 +161,15 @@ def login():
 @app.route('/logout')
 def logout():
 
-    # Remove informações da sessão.
+    # Esta rota realiza a saída do usuário do sistema.
+    #
+    # Para isso, remove da sessão os dados usados para identificar
+    # o usuário logado e depois redireciona para a página inicial.
     session.pop('id', None)
     session.pop('nome', None)
     session.pop('email', None)
     session.pop('perfil', None)
 
-    # Volta para home.
     return redirect(url_for('home'))
 
 
@@ -272,40 +180,38 @@ def logout():
 @app.route("/cadastro", methods=["GET"])
 def get_cadastro():
 
-    # Exibe formulário de cadastro.
+    # Esta rota exibe o formulário de cadastro de novos usuários.
+    #
+    # Ela apenas carrega a página HTML onde o usuário poderá informar
+    # nome, email, senha, perfil e idade.
     return render_template("cadastro.html")
 
 
 @app.route("/cadastro", methods=["POST"])
 def cadastrar_usuario():
 
-    # Captura dados enviados pelo formulário.
+    # Esta rota processa o cadastro de um novo usuário.
+    #
+    # Ela recebe os dados enviados pelo formulário, valida os campos
+    # obrigatórios, criptografa a senha e salva o novo usuário no banco.
     nome = request.form.get("nome")
     email = request.form.get("email")
     senha = request.form.get("senha")
-
-    # Perfil padrão = aluno.
     perfil = request.form.get("perfil", "aluno")
-
     idade = request.form.get("idade")
 
-    # Validação.
     if not nome or not email or not senha:
         return render_template(
             "cadastro.html",
             erro="Nome, email e senha são obrigatórios."
         )
 
-    # Criptografa senha.
     senha_hash = generate_password_hash(senha)
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-
-        # INSERT INTO:
-        # Insere dados no banco.
         sql = """
         INSERT INTO usuarios (nome, email, senha, perfil, idade)
         VALUES (%s, %s, %s, %s, %s)
@@ -319,20 +225,17 @@ def cadastrar_usuario():
             idade
         ))
 
-        # Salva alterações no banco.
         conn.commit()
 
         return redirect(url_for("get_login"))
 
     except Exception as e:
-
         return render_template(
             "cadastro.html",
             erro=str(e)
         )
 
     finally:
-
         cursor.close()
         conn.close()
 
@@ -344,17 +247,15 @@ def cadastrar_usuario():
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
 
-    # Proteção de rota.
+    # Esta rota exibe o painel principal do sistema.
     #
-    # Apenas usuários logados podem acessar.
+    # O dashboard só pode ser acessado por usuários logados. Ele envia
+    # para o HTML informações básicas do usuário, como ID e nome.
     if "id" not in session:
         return redirect(url_for("get_login"))
 
-    # Renderiza painel principal.
     return render_template(
         "dashboard.html",
-
-        # Dados enviados para HTML.
         usuario_id=session["id"],
         nome=session.get("nome")
     )
@@ -367,7 +268,11 @@ def dashboard():
 @app.route("/dashboard/dados", methods=["GET"])
 def dashboard_dados():
 
-    # Verifica autenticação.
+    # Esta rota funciona como uma API do dashboard.
+    #
+    # Ela calcula o total de receitas, o total de despesas e o saldo
+    # do usuário logado, retornando essas informações em formato JSON
+    # para serem usadas pelo frontend.
     if "id" not in session:
         return jsonify({
             "erro": "Usuário não autenticado."
@@ -379,8 +284,6 @@ def dashboard_dados():
     cursor = conn.cursor(dictionary=True)
 
     try:
-
-        # Soma todas receitas do usuário.
         cursor.execute("""
             SELECT COALESCE(SUM(valor), 0) AS total_receitas
             FROM receitas
@@ -389,7 +292,6 @@ def dashboard_dados():
 
         receitas = cursor.fetchone()
 
-        # Soma todas despesas.
         cursor.execute("""
             SELECT COALESCE(SUM(valor), 0) AS total_despesas
             FROM despesas
@@ -398,14 +300,11 @@ def dashboard_dados():
 
         despesas = cursor.fetchone()
 
-        # Converte Decimal para float.
         total_receitas = float(receitas["total_receitas"])
         total_despesas = float(despesas["total_despesas"])
 
-        # Calcula saldo.
         saldo = total_receitas - total_despesas
 
-        # Retorna JSON.
         return jsonify({
             "total_receitas": total_receitas,
             "total_despesas": total_despesas,
@@ -413,17 +312,652 @@ def dashboard_dados():
         })
 
     except Exception as e:
-
         return jsonify({
             "erro": str(e)
         }), 500
 
     finally:
+        cursor.close()
+        conn.close()
 
+# ==========================================================
+# API DO DASHBOARD - DESPESAS POR CATEGORIA
+# ==========================================================
+
+@app.route("/dashboard/despesas-categorias/", methods=["GET"])
+def dashboard_despesas_categoria():
+
+    # Esta rota retorna os totais de despesas agrupados por categoria.
+    #
+    # Ela funciona como uma API do dashboard, pois entrega os dados em JSON
+    # para que o frontend possa montar gráficos ou cards informativos.
+    # Apenas usuários autenticados podem acessar essas informações.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT 
+                c.nome AS categoria,
+                SUM(d.valor) AS total
+            FROM despesas d
+            LEFT JOIN categorias c ON c.id = d.categoria_id
+            WHERE d.usuario_id = %s
+            GROUP BY c.nome
+            ORDER BY total DESC
+        """, (usuario_id,))
+
+        dados = cursor.fetchall()
+
+        for item in dados:
+            item["total"] = float(item["total"])
+
+        return jsonify(dados)
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
         cursor.close()
         conn.close()
 
 
+# ==========================================================
+# RECEITAS
+# ==========================================================
+
+@app.route("/receitas", methods=["GET"])
+def get_receitas():
+
+    # Esta rota exibe a página de cadastro/listagem de receitas.
+    #
+    # Antes de carregar a tela, o sistema verifica se o usuário está logado.
+    # Também busca no banco as categorias do tipo receita para preencher
+    # o formulário da página.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id, nome 
+            FROM categorias 
+            WHERE tipo = 'receita'
+            ORDER BY nome
+        """)
+        categorias = cursor.fetchall()
+
+        return render_template(
+            "receitas.html",
+            categorias=categorias
+        )
+
+    except Exception as e:
+        return render_template(
+            "receitas.html",
+            categorias=[],
+            erro=str(e)
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/receitas", methods=["POST"])
+def cadastrar_receita():
+
+    # Esta rota recebe os dados do formulário de receitas e grava no banco.
+    #
+    # Ela captura descrição, valor, data e categoria da receita informada
+    # pelo usuário. Após o cadastro ser concluído, o usuário é redirecionado
+    # para o dashboard.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    usuario_id = session["id"]
+    descricao = request.form.get("descricao")
+    valor = request.form.get("valor")
+    data_receita = request.form.get("data_receita")
+    categoria_id = request.form.get("categoria_id")
+
+    if not descricao or not valor or not data_receita:
+        return redirect(url_for("get_receitas"))
+
+    if categoria_id == "":
+        categoria_id = None
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        sql = """
+        INSERT INTO receitas 
+        (usuario_id, categoria_id, descricao, valor, data_receita)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        cursor.execute(sql, (
+            usuario_id,
+            categoria_id,
+            descricao,
+            valor,
+            data_receita
+        ))
+
+        conn.commit()
+
+        return redirect(url_for("dashboard"))
+
+    except Exception as e:
+        return render_template(
+            "receitas.html",
+            categorias=[],
+            erro=str(e)
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ==========================================================
+# DESPESAS
+# ==========================================================
+
+@app.route("/despesas", methods=["GET"])
+def get_despesas():
+
+    # Esta rota exibe a página de cadastro/listagem de despesas.
+    #
+    # O sistema verifica se o usuário está autenticado e busca as categorias
+    # do tipo despesa para serem usadas no formulário da página.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id, nome
+            FROM categorias
+            WHERE tipo = 'despesa'
+            ORDER BY nome
+        """)
+        categorias = cursor.fetchall()
+
+        return render_template(
+            "despesas.html",
+            categorias=categorias
+        )
+
+    except Exception as e:
+        return render_template(
+            "despesas.html",
+            categorias=[],
+            erro=str(e)
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/despesas", methods=["POST"])
+def cadastrar_despesa():
+
+    # Esta rota recebe os dados do formulário de despesas e grava no banco.
+    #
+    # Ela registra a despesa vinculada ao usuário logado, permitindo informar
+    # descrição, valor, data e categoria. Após salvar, o usuário retorna
+    # para o dashboard.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    usuario_id = session["id"]
+    descricao = request.form.get("descricao")
+    valor = request.form.get("valor")
+    data_despesa = request.form.get("data_despesa")
+    categoria_id = request.form.get("categoria_id")
+
+    if not descricao or not valor or not data_despesa:
+        return redirect(url_for("get_despesas"))
+
+    if categoria_id == "":
+        categoria_id = None
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        sql = """
+        INSERT INTO despesas 
+        (usuario_id, categoria_id, descricao, valor, data_despesa)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        cursor.execute(sql, (
+            usuario_id,
+            categoria_id,
+            descricao,
+            valor,
+            data_despesa
+        ))
+
+        conn.commit()
+
+        return redirect(url_for("dashboard"))
+
+    except Exception as e:
+        return render_template(
+            "despesas.html",
+            categorias=[],
+            erro=str(e)
+        )
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ==========================================================
+# RELATÓRIOS
+# ==========================================================
+
+@app.route("/relatorios", methods=["GET"])
+def get_relatorios():
+
+    # Esta rota exibe a página principal de relatórios.
+    #
+    # Ela apenas renderiza o HTML dos relatórios, enviando o ID do usuário
+    # para que o frontend possa carregar informações específicas desse usuário.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    return render_template(
+        "relatorios.html",
+        usuario_id=session["id"]
+    )
+
+
+@app.route("/relatorios/despesas-categorias", methods=["GET"])
+def relatorio_despesas_categoria():
+
+    # Esta rota retorna um relatório de despesas agrupadas por categoria.
+    #
+    # Diferente da rota principal de relatórios, esta rota funciona como API,
+    # entregando os dados em JSON para tabelas, gráficos ou outros componentes
+    # da tela de relatórios.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT 
+                c.nome AS categoria,
+                SUM(d.valor) AS total
+            FROM despesas d
+            LEFT JOIN categorias c ON c.id = d.categoria_id
+            WHERE d.usuario_id = %s
+            GROUP BY c.nome
+            ORDER BY total DESC
+        """, (usuario_id,))
+
+        dados = cursor.fetchall()
+
+        for item in dados:
+            item["total"] = float(item["total"])
+
+        return jsonify(dados)
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/receitas/listar", methods=["GET"])
+def listar_receitas():
+
+    # Esta rota lista todas as receitas cadastradas pelo usuário logado.
+    #
+    # Ela retorna os dados em formato JSON, incluindo descrição, valor,
+    # data da receita e nome da categoria. Esses dados podem ser usados
+    # em tabelas ou relatórios no frontend.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT 
+                r.id,
+                r.descricao,
+                r.valor,
+                r.data_receita,
+                c.nome AS categoria
+            FROM receitas r
+            LEFT JOIN categorias c ON c.id = r.categoria_id
+            WHERE r.usuario_id = %s
+            ORDER BY r.data_receita DESC
+        """, (usuario_id,))
+
+        receitas = cursor.fetchall()
+
+        for item in receitas:
+            item["valor"] = float(item["valor"])
+            item["data_receita"] = formatar_data_br(item["data_receita"])
+
+        return jsonify(receitas)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/despesas/listar", methods=["GET"])
+def listar_despesas():
+
+    # Esta rota lista todas as despesas cadastradas pelo usuário logado.
+    #
+    # Ela retorna os dados em formato JSON, incluindo descrição, valor,
+    # data da despesa e nome da categoria. As despesas são ordenadas
+    # das mais recentes para as mais antigas.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT 
+                d.id,
+                d.descricao,
+                d.valor,
+                d.data_despesa,
+                c.nome AS categoria
+            FROM despesas d
+            LEFT JOIN categorias c ON c.id = d.categoria_id
+            WHERE d.usuario_id = %s
+            ORDER BY d.data_despesa DESC
+        """, (usuario_id,))
+
+        despesas = cursor.fetchall()
+
+        for item in despesas:
+            item["valor"] = float(item["valor"])
+            item["data_despesa"] = formatar_data_br(item["data_despesa"])
+
+        return jsonify(despesas)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ==========================================================
+# FEEDBACK
+# ==========================================================
+
+@app.route("/feedback", methods=["GET"])
+def get_feedback():
+
+    # Esta rota exibe a página de feedback do sistema.
+    #
+    # O usuário precisa estar logado para acessar a tela e registrar
+    # sua avaliação sobre a plataforma.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    return render_template("feedback.html")
+
+
+@app.route("/feedback", methods=["POST"])
+def cadastrar_feedback():
+
+    # Esta rota recebe e salva o feedback enviado pelo usuário.
+    #
+    # A nota é obrigatória, enquanto o comentário serve como complemento.
+    # O feedback é vinculado ao usuário logado para manter o histórico
+    # individual de avaliações.
+    if "id" not in session:
+        return redirect(url_for("get_login"))
+
+    nota = request.form.get("nota")
+    comentario = request.form.get("comentario")
+    usuario_id = session["id"]
+
+    if not nota:
+        return render_template(
+            "feedback.html",
+            erro="A nota é obrigatória."
+        )
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            INSERT INTO feedbacks (usuario_id, nota, comentario)
+            VALUES (%s, %s, %s)
+        """, (usuario_id, nota, comentario))
+
+        conn.commit()
+
+        return redirect(url_for("get_feedback"))
+
+    except Exception as e:
+        return render_template("feedback.html", erro=str(e))
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/feedbacks", methods=["GET"])
+def listar_feedbacks():
+
+    # Esta rota lista os feedbacks enviados pelo usuário logado.
+    #
+    # O retorno é feito em JSON e pode ser usado para exibir um histórico
+    # de avaliações dentro do sistema.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT nota, comentario, criado_em
+            FROM feedbacks
+            WHERE usuario_id = %s
+            ORDER BY criado_em DESC
+        """, (usuario_id,))
+
+        feedbacks = cursor.fetchall()
+
+        for item in feedbacks:
+            item["criado_em"] = formatar_data_br(item["criado_em"])
+
+        return jsonify(feedbacks)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# ==========================================================
+# ROTAS IA
+# ==========================================================
+
+@app.route("/ia", methods=["GET"])
+def pagina_ia():
+
+    # Esta rota exibe a página da inteligência artificial financeira.
+    #
+    # Ela renderiza a tela onde o usuário poderá solicitar análises,
+    # sugestões e orientações automáticas com base nos dados financeiros
+    # cadastrados no sistema.
+    if "id" not in session:
+        return redirect(url_for("home"))
+
+    return render_template("ia.html")
+
+
+@app.route("/ia/analise-financeira", methods=["GET"])
+def analise_financeira():
+
+    # Esta rota gera uma análise financeira automática usando IA.
+    #
+    # O sistema calcula receitas, despesas e saldo do usuário logado.
+    # Em seguida, envia essas informações para o modelo de IA, recebe
+    # uma análise textual e salva essa resposta no banco de dados.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT COALESCE(SUM(valor), 0) AS total_receitas
+            FROM receitas
+            WHERE usuario_id = %s
+        """, (usuario_id,))
+        receitas = cursor.fetchone()
+
+        cursor.execute("""
+            SELECT COALESCE(SUM(valor), 0) AS total_despesas
+            FROM despesas
+            WHERE usuario_id = %s
+        """, (usuario_id,))
+        despesas = cursor.fetchone()
+
+        total_receitas = float(receitas["total_receitas"])
+        total_despesas = float(despesas["total_despesas"])
+        saldo = total_receitas - total_despesas
+
+        prompt = f"""
+        Analise a situação financeira abaixo de forma simples e didática.
+
+        Receitas: R$ {total_receitas:.2f}
+        Despesas: R$ {total_despesas:.2f}
+        Saldo: R$ {saldo:.2f}
+
+        Gere:
+        1. Um resumo da situação.
+        2. Um alerta, se necessário. Especifique em que categorias poderia reduzir os custos para obter os objetivos propostas.
+        3. Três sugestões práticas para melhorar a vida financeira.
+        """
+
+        resposta = client_groq.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Você é um assistente financeiro simples, claro e educativo."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.4
+        )
+
+        analise_gerada = resposta.choices[0].message.content
+
+        cursor.execute("""
+            INSERT INTO sugestoes_ia (usuario_id, pergunta, resposta)
+            VALUES (%s, %s, %s)
+        """, (
+            usuario_id,
+            "Análise financeira geral",
+            analise_gerada
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            "analise": analise_gerada
+        })
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route("/ia/sugestoes", methods=["GET"])
+def listar_sugestoes_ia():
+
+    # Esta rota lista o histórico de sugestões geradas pela IA.
+    #
+    # Cada análise financeira gerada é salva no banco e pode ser consultada
+    # depois pelo usuário. O retorno é feito em JSON, com data e hora
+    # formatadas para facilitar a leitura no frontend.
+    if "id" not in session:
+        return jsonify({"erro": "Usuário não autenticado."}), 401
+
+    usuario_id = session["id"]
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id,
+                pergunta,
+                resposta,
+                criado_em
+            FROM sugestoes_ia
+            WHERE usuario_id = %s
+            ORDER BY criado_em DESC
+        """, (usuario_id,))
+
+        sugestoes = cursor.fetchall()
+
+        for item in sugestoes:
+            item["criado_em"] = formatar_datahora_br(item["criado_em"])
+
+        return jsonify(sugestoes)
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 # ==========================================================
 # EXECUÇÃO DA APLICAÇÃO
