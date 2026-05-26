@@ -1,43 +1,38 @@
-# Importa o módulo "os" da biblioteca padrão do Python.
-# Esse módulo permite interagir com o sistema operacional,
-# como acessar arquivos, pastas e variáveis de ambiente.
-import os
+# ==========================================================
+# IMPORTAÇÕES
+# ==========================================================
 
-# Importa a classe "Groq" da biblioteca "groq".
-# Essa biblioteca é usada para se comunicar com a API da Groq,
-# permitindo enviar requisições para modelos de inteligência artificial.
+# Recursos usados para acessar variáveis de ambiente e conectar à API da Groq.
+import os
 from groq import Groq
 
 
-# Cria uma variável chamada GROQ_API_KEY.
-# Ela recebe o valor da variável de ambiente chamada "GROQ_API_KEY".
-#
-# Variáveis de ambiente são usadas para armazenar informações sensíveis,
-# como senhas e chaves de API, sem precisar escrever diretamente no código.
-#
-# O método os.getenv("NOME") busca o valor da variável de ambiente.
-# Se ela não existir, retorna None.
+# ==========================================================
+# CONFIGURAÇÃO DA CHAVE DA API
+# ==========================================================
+
+# Recupera a chave da API da Groq definida nas variáveis de ambiente.
+# evita deixar chaves sensíveis escritas diretamente no código-fonte.
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
-# Verifica se a variável GROQ_API_KEY está vazia ou não existe.
-#
-# O operador "not" verifica se o valor é falso.
-# Em Python, None, vazio ("") e False são considerados falsos.
-if not GROQ_API_KEY:
+# ==========================================================
+# VALIDAÇÃO
+# ==========================================================
 
-    # Exibe uma mensagem de erro no terminal caso a chave da API
-    # não tenha sido encontrada.
-    #
-    # Isso ajuda o programador a identificar o problema rapidamente.
+# Informa no terminal caso a chave da API não esteja configurada.
+# o sistema exibe uma mensagem de erro no terminal para ajudar o 
+# desenvolvedor a identificar o problema durante a execução.
+if not GROQ_API_KEY:
     print("ERRO: GROQ_API_KEY não encontrada.")
 
 
-# Cria um objeto da classe Groq.
-#
-# Esse objeto será responsável por fazer a conexão com a API da Groq.
-#
-# O parâmetro api_key=GROQ_API_KEY envia a chave da API para autenticação.
-#
-# Sem essa chave, normalmente a API recusará as requisições.
+# ==========================================================
+# CLIENTE GROQ
+# ==========================================================
+
+# Cria o cliente usado para enviar requisições à API da Groq.
+# Esse objeto será utilizado em outras partes do sistema para enviar
+# prompts, solicitar análises e receber respostas geradas por 
+# inteligência artificial.
 client_groq = Groq(api_key=GROQ_API_KEY)
