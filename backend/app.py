@@ -23,9 +23,7 @@ from ia import client_groq
 #
 # A aplicação é inicializada, o CORS é habilitado e a chave secreta
 # é definida para proteger as sessões dos usuários logados.
-#
-# A chave deve ser gerada pelo desenvolvedor e armazenada em uma variável
-# de ambiente segura, evitando exposição no controle de versão.
+
 app = Flask(__name__)
 CORS(app)
 
@@ -40,9 +38,7 @@ def formatar_data_br(data):
 
     # Esta função recebe uma data do banco de dados e converte para
     # o padrão brasileiro, facilitando a leitura pelo usuário.
-    #
-    # Exemplo:
-    # 2026-05-24 será exibido como 24/05/2026.
+ 
     if not data:
         return None
 
@@ -54,8 +50,7 @@ def formatar_datahora_br(datahora):
     # Esta função recebe uma data com horário e converte para o padrão
     # brasileiro, exibindo dia, mês, ano, hora e minuto.
     #
-    # Exemplo:
-    # 2026-05-24 14:30 será exibido como 24/05/2026 14:30.
+    
     if not datahora:
         return None
 
