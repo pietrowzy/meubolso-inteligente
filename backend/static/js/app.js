@@ -1,8 +1,9 @@
 // ============================ 
 // Configuração da API 
 // ============================ 
-// Define a URL base da nossa API para requisições 
-const API_URL = "http://127.0.0.1:5000";
+// Define a URL base da nossa API dinamicamente baseada na origem atual
+// Funciona em qualquer ambiente (desenvolvimento, produção, etc.)
+const API_URL = window.location.origin;
 
 
 // ============================ 
@@ -388,7 +389,7 @@ async function carregarFeedbacks() {
  
     feedbacks.forEach(item => { 
         let estrelas = ""; 
-        for (let i = 0; i < Number(item.nota); i++) estrelas += "   "; 
+        for (let i = 0; i < Number(item.nota); i++) estrelas += "⭐"; 
  
         const div = document.createElement("div"); 
         div.className = "feedback-card"; 
